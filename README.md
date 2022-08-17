@@ -1,6 +1,6 @@
 # OmniAuth HumanID
 
-Experimental Omniauth for humanID, a platform that prevents bots and increases privacy. I believe it has a foundation of some kind behind it that keeps it responsible.
+Experimental Omniauth for humanID, a platform that prevents bots and increases privacy. It has a foundation of some kind behind it that keeps it responsible.
 Not sure on the details of that (not a lawyer), but either way the benefits of humanID are:
 
 1. Increased privacy for users through both technical innovations and legal responsibilities
