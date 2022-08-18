@@ -1,5 +1,3 @@
-require_relative 'lib/omniauth/humanid/version'
-
 version = '0.0.1'
 
 Gem::Specification.new do |spec|
