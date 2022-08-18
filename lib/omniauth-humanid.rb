@@ -13,21 +13,21 @@ module OmniAuth
 			#note the image in the below documentation, I will try to reference back to it below
 			#https://docs.human-id.org/web-sdk-integration-guide#api-request-web-log-in-session
 
-			provider :humanid
-			options :login_button_path, '[LOGIN_BUTTON_PATH]'
+			#options :login_button_path, '[LOGIN_BUTTON_PATH]'
 			options :humanid_version, 'v0.0.3'
-			options :local_sign_up_url, "/omniauth/humanid"
+			#options :local_sign_up_url, "/auth/humanid"
 			options :external_signup_url, "https://core.human-id.org/[HUMANID_VERSION]/server/users/web-login"
 			options :lang, :en
+            options :priority_country, nil #this is an option in the docs, but they dont give an example value (otherwise I would set to united_states, or us, or 1)
 			options :client_secret, nil
 			options :client_id, nil
 
-			def self.humanid_button
-				#see https://docs.human-id.org/web-sdk-integration-guide
-				%Q{<a href="#{options.local_sign_up_url}">
-    				<img src="#{options.login_button_path}" alt="Anonymous Login with humanID" height="27"/>
-				<a>}
-			end
+			# def self.humanid_button
+			# 	#see https://docs.human-id.org/web-sdk-integration-guide
+			# 	%Q{<a href="#{options.local_sign_up_url}">
+    		# 		<img src="#{options.login_button_path}" alt="Anonymous Login with humanID" height="27"/>
+			# 	<a>}
+			# end
 
 			def get_client_id
 				return options.client_secret unless options.client_secret.nil?
@@ -40,6 +40,7 @@ module OmniAuth
 			def get_external_signup_url
 				url = options.external_signup_url.gsub('[HUMANID_VERSION]', options.humanid_version)
 				url += "?lang=#{options.lang}" if options.lang
+                url += "?priority_country=#{options.priority_country}" if options.priority_country
 			end
 			def request_phase_err(res)
 				raise StandardError.new("Issue with the request phase of humanid omniauth, response from human id has code: #{res.code}, and body: #{res.body}")
