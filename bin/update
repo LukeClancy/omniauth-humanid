@@ -26,6 +26,6 @@ File.write('./omniauth-humanid.gemspec', x)
 puts "_______________________________________________"
 puts `git add *`
 puts "_______________________________________________"
-puts `git commit -m '...'`
+puts `git commit -m 'minor changes to version #{version_new}'`
 puts "_______________________________________________"
 puts `bundle exec rake install`
