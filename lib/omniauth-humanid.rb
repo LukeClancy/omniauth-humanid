@@ -64,6 +64,8 @@ module OmniAuth
 				#make a post request (but dont send it yet)
 				post_request = Net::HTTP::Post.new(uri)
 				Rails.logger.info "HUMANID_OMNIAUTH post_request: #{post_request}"
+				Rails.logger.info get_client_id
+				Rails.logger.info get_client_secret
 				#set the headers as per docs.
 				post_request['client-id'] = get_client_id
 				post_request['client-secret'] = get_client_secret
