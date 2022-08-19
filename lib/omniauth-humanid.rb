@@ -44,6 +44,7 @@ module OmniAuth
 				url = options.external_signup_url.gsub('[HUMANID_VERSION]', options.humanid_version)
 				url += "?lang=#{options.lang}" if options.lang
                 url += "?priority_country=#{options.priority_country}" if options.priority_country
+				return url
 			end
 			def request_phase_err(res)
 				raise StandardError.new("Issue with the request phase of humanid omniauth, response from human id has code: #{res.code}, and body: #{res.body}")
