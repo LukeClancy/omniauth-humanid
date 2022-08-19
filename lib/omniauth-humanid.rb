@@ -32,7 +32,7 @@ module OmniAuth
 
 			def get_client_id
 			#basic check for client_id
-				return options.client_secret unless options.client_secret.nil?
+				return options.client_id unless options.client_id.nil?
 				raise StandardError.new("Please set omniauth-humanid client id")
 			end
 			def get_client_secret
