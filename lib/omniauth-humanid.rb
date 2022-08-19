@@ -50,7 +50,7 @@ module OmniAuth
 			end
 			#request phase
 			def request_phase
-				Rails.logger.info "REQUEST PHASE ___________________________________________________"
+				Rails.logger.debug "HUMANID_OMNIAUTH REQUEST PHASE ___________________________________________________"
 				# In the humanid web-sdk-integration-guide, this would be the "[1] login" step. We need to get the redirect url
 				# through a post request, and then send that to the user.
 
@@ -59,14 +59,18 @@ module OmniAuth
 
 				#get uri
 				uri = URI(get_external_signup_url)
+				Rails.logger.debug "HUMANID_OMNIAUTH URI: #{uri.to_s}"
 				#make a post request (but dont send it yet)
 				post_request = Net::HTTP::Post.new(uri)
+				Rails.logger.info "HUMANID_OMNIAUTH post_request: #{post_request}"
 				#set the headers as per docs.
 				post_request['client-id'] = get_client_id
 				post_request['client-secret'] = get_client_secret
 				post_request['Content-Type'] = 'application/json'
 				#send the request using a weirdly 🤷‍♂️ overcomplicated 🤷‍♂️ method 🤷‍♂️ and 🤷‍♂️ block 🤷‍♂️ blame Net::HTTP
+				Rails.logger.info("BEFORE POST")
 				res = Net::HTTP.start(uri.hostname, uri.port, use_ssl: true){|http| http.request(post_request)}
+				Rails.logger.info("AFT POST")
 
 				Rails.logger.info(res)
 				if res.code == "200"

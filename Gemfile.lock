@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    omniauth-humanid (0.0.9)
+    omniauth-humanid (0.0.10)
 
 GEM
   remote: https://rubygems.org/
