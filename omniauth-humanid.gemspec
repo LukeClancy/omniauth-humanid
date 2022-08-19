@@ -1,4 +1,4 @@
-version = '0.0.3'
+version = '0.0.5'
 
 Gem::Specification.new do |spec|
   spec.name          = "omniauth-humanid"

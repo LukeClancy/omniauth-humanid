@@ -7,20 +7,21 @@ module OmniAuth
 			#Omniauth strategy creation guide be useful
 			#https://github.com/omniauth/omniauth/wiki/Strategy-Contribution-Guide
 
-			#then this guy created another useful blog 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
+			#then this guy created another useful blog 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
+			#🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
 			#https://dev.to/vvo/devise-create-a-local-omniauth-strategy-for-slack-4066
 
 			#note the image in the below documentation, I will try to reference back to it below
 			#https://docs.human-id.org/web-sdk-integration-guide#api-request-web-log-in-session
 
 			#options :login_button_path, '[LOGIN_BUTTON_PATH]'
-			options :humanid_version, 'v0.0.3'
+			option :humanid_version, 'v0.0.3'
 			#options :local_sign_up_url, "/auth/humanid"
-			options :external_signup_url, "https://core.human-id.org/[HUMANID_VERSION]/server/users/web-login"
-			options :lang, :en
-            options :priority_country, nil #this is an option in the docs, but they dont give an example value (otherwise I would set to united_states, or us, or 1)
-			options :client_secret, nil
-			options :client_id, nil
+			option :external_signup_url, "https://core.human-id.org/[HUMANID_VERSION]/server/users/web-login"
+			option :lang, :en
+            option :priority_country, nil #this is an option in the docs, but they dont give an example value (otherwise I would set to united_states, or us, or 1)
+			option :client_secret, nil
+			option :client_id, nil
 
 			# def self.humanid_button
 			# 	#see https://docs.human-id.org/web-sdk-integration-guide
@@ -31,11 +32,11 @@ module OmniAuth
 
 			def get_client_id
 				return options.client_secret unless options.client_secret.nil?
-				raise StandardError.new("Set humanid client id")
+				raise StandardError.new("Please set omniauth-humanid client id")
 			end
 			def get_client_secret
 				return options.client_secret unless options.client_secret.nil?
-				raise StandardError.new("Set humanid client secret")
+				raise StandardError.new("Set omniauth-humanid client secret")
 			end
 			def get_external_signup_url
 				url = options.external_signup_url.gsub('[HUMANID_VERSION]', options.humanid_version)
@@ -47,6 +48,7 @@ module OmniAuth
 			end
 			#request phase
 			def request_phase
+				Rails.logger.info "REQUEST PHASE"
 				# In the humanid web-sdk-integration-guide, this would be the "[1] login" step. We need to get the redirect url
 				# through a post request, and then send that to the user.
 
