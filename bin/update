@@ -21,9 +21,11 @@ x[0] = "version = '#{version_new}'"
 puts "x[0] => #{x[0]}"
 puts "_______________________________________________"
 x = x.join("\n")
-puts "_______________________________________________"
 puts x
 File.write('./omniauth-humanid.gemspec', x)
-`git add *`
-`git commit -m '...'`
-`bundle exec rake install`
+puts "_______________________________________________"
+puts `git add *`
+puts "_______________________________________________"
+puts `git commit -m '...'`
+puts "_______________________________________________"
+puts `bundle exec rake install`

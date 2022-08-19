@@ -1,4 +1,5 @@
-version = '0.0.7'
+version = '0.0.8'
+#version must be on the first line for the update script
 
 Gem::Specification.new do |spec|
   spec.name          = "omniauth-humanid"
