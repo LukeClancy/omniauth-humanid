@@ -31,10 +31,12 @@ module OmniAuth
 			# end
 
 			def get_client_id
+			#basic check for client_id
 				return options.client_secret unless options.client_secret.nil?
 				raise StandardError.new("Please set omniauth-humanid client id")
 			end
 			def get_client_secret
+			#basic check for client_secret
 				return options.client_secret unless options.client_secret.nil?
 				raise StandardError.new("Set omniauth-humanid client secret")
 			end
@@ -66,6 +68,7 @@ module OmniAuth
 				#send the request using a weirdly 🤷‍♂️ overcomplicated 🤷‍♂️ method 🤷‍♂️ and 🤷‍♂️ block 🤷‍♂️ blame Net::HTTP
 				res = Net::HTTP.start(uri.hostname, uri.port, use_ssl: true){|http| http.request(post_request)}
 
+				Rails.logger.info(res)
 				if res.code == "200"
 					body = Json.parse(res.body)
 					# they have five diffrent metrics for success:
@@ -77,10 +80,12 @@ module OmniAuth
 					# I check 1 and 5 since the others seem supplimentary
 					
 					#get the redirect url
+					Rails.logger.info(body)
 					redirect_url = body.dig("data", "webLoginUrl")
 					#check it, throw an error if nil
 					request_phase_err(res) if redirect_url.nil?
 					#redirect (everything is working!)
+					Rails.logger.info(redirect_url)
 					redirect redirect_url
 				else
 					request_phase_err(res)
