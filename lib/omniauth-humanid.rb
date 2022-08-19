@@ -77,7 +77,7 @@ module OmniAuth
 
 				Rails.logger.info(res)
 				if res.code == "200"
-					body = Json.parse(res.body)
+					body = JSON.parse(res.body)
 					# they have five diffrent metrics for success:
 					#	1. the response code 200
 					#	2. body["success"] == true
