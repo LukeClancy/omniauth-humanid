@@ -2,7 +2,7 @@
 #this is for development and should not be for actual updates,
 #   I just got annoyed with the number of things you had to do to get the updated
 #   version on your machine. Even after this you have to update and restart your website...
-#   maybe ill make a script for that too
+#   you can one-line that with ./bin/bundle install && ../bin rails s
 x = File.read('./omniauth-humanid.gemspec')
 x = x.split("\n")
 puts x.class

@@ -50,7 +50,7 @@ module OmniAuth
 			end
 			#request phase
 			def request_phase
-				Rails.logger.info "REQUEST PHASE"
+				Rails.logger.info "REQUEST PHASE ___________________________________________________"
 				# In the humanid web-sdk-integration-guide, this would be the "[1] login" step. We need to get the redirect url
 				# through a post request, and then send that to the user.
 
