@@ -77,7 +77,7 @@ When developing the Gem, for minor updates while debugging etc, we have a custom
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/omniauth-humanid. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [code of conduct](https://github.com/LukeClancy/omniauth-humanid/blob/master/CODE_OF_CONDUCT.md).
+Bug reports and pull requests are welcome on GitHub at https://github.com/LukeClancy/omniauth-humanid. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [code of conduct](https://github.com/LukeClancy/omniauth-humanid/blob/master/CODE_OF_CONDUCT.md).
 
 ## License
 
