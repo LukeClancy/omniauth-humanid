@@ -1,6 +1,6 @@
-# OmniAuth HumanID Alpha
+# Ruby/Rails OmniAuth for HumanID Alpha
 
-Experimental Omniauth for humanID, a platform that prevents bots and increases privacy. HumanID is run by Human Internet,
+Omniauth for humanID, a platform that prevents bots and increases privacy. HumanID is run by Human Internet,
 a non-profit that is currently financed by organizations such as Harvard and the Mozilla Foundation (I love the Mozilla
 Developer Network (MDN) which gives great javascript information).
 
