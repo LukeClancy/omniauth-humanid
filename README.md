@@ -59,11 +59,75 @@ Update as normal.
     - TBD
 
 ## Additional configuration
+
+### Omniauth options
+
 additional configuration can be set in your initializer file at the same area and in the same method as your client-secret and client-id. Additional configuration is as follows: 
 - lang: default language code. Defaults to 'en' (english). Set to nil to remove from url.
 - humanid_version: version string that goes in the url. Defaults to 'v0.0.3'. If humanid updates this may need to be updated aswell.
 - priority_country: not sure exactly what this does or how to use it, but it was in the docs so i added it as an option. Defaults to nil.
 - external_signup_url: the web login url. Defaults to: "https://core.human-id.org/[HUMANID_VERSION]/server/users/web-login". [HUMANID_VERSION] gets substituted by humanid_version above.
+
+### Devise without emails/passwords
+
+Once again, humanID is better when used alone bue to bot mitigation. This section is how to remove email/password authentication.
+
+Although Devise is easier to deal with without usernames / passwords, it takes a bit to get there. This is out of the gem scope, but here are some pointers below. You may run into other hurdles depending on your setup.
+1. In your user.rb (or similar) model, in your devise config line, remove all of the following:
+	- confirmable
+	- database_authenticatable
+	- recoverable
+	- confirmable
+	- lockable
+2. In your devise.rb initializer file, make sure to set authentication_keys to []
+3. delete or comment out the selections in devise.rb related to number 1.
+4. I had to add back the route below:
+```ruby
+as :user do
+	delete "/users/sign_out" => "users/sessions#destroy"
+end
+```
+5. For development you may have to create a seperate way to login/signup for testing purposes. You can do this by sending a form that implements the method 'sign_in_and_redirect user, event: :authentication', or that sets fake values for signup. MAKE SURE THIS METHOD IS ONLY ACTIVE DURING DEVELOPMENT. I have a version of this below:
+	- in my routes.rb:
+	```ruby
+	as :user do
+		if Rails.env.development?
+			post '/users/override' => 'users/omniauth_callbacks#callback_override'
+		end
+	end
+	```
+	- in my OmniauthCallbacksController override (see devise documentation):
+	```ruby
+	def callback_common(provider, uid)
+		user = User.from_omniauth(provider, uid)
+		if user
+			#allready have an account, sign them in
+			sign_in_and_redirect user, event: :authentication # this will throw if user is not activated
+		else
+			request.session['signup'] ||= {}
+			request.session["signup"]["provider"] = provider
+			request.session["signup"]["uid"] = uid
+			raise StandardError.new("REPLACE THIS ERROR WITH A REDIRECT TO FINISH SIGNUP")
+		end
+	end
+	if Rails.env.development?
+		def callback_override
+			raise StandardError.new("nope") unless Rails.env.development?
+			provider = 'override'
+			uid = params['uid']
+			callback_common provider, uid
+		end
+	end
+	```
+	- my form (hidden in a dropdown menu)
+	```ruby
+		- if Rails.env.development?
+			.dropdown-item
+				= form_with url: users_override_path, method: :post do
+					%p put username below to bypass the humanID in development
+					= text_field_tag :uid, '', class: 'form-control'
+					= submit_tag "GO", class: "btn btn-primary"
+	```
 
 ## Development of the Gem (Gem usage info stops here)
 
