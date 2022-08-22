@@ -40,18 +40,20 @@ module OmniAuth
 				return options.client_secret unless options.client_secret.nil?
 				raise StandardError.new("Set omniauth-humanid client secret")
 			end
-			def get_external_signup_url
-				url = options.external_signup_url.gsub('[HUMANID_VERSION]', options.humanid_version)
-				url += "?lang=#{options.lang}" if options.lang
-                url += "?priority_country=#{options.priority_country}" if options.priority_country
-				return url
+			def get_external_signup_uri
+				uri = URI(options.external_signup_url.gsub('[HUMANID_VERSION]', options.humanid_version))
+				query = [
+					['lang', options.lang],
+					['priority_country', options.priority_country]
+				].select{|a| not a[1].nil?}
+				uri.query = URI.encode_www_form(query)
+				return uri
 			end
 			def request_phase_err(res)
 				raise StandardError.new("Issue with the request phase of humanid omniauth, response from human id has code: #{res.code}, and body: #{res.body}")
 			end
 			#request phase
 			def request_phase
-				Rails.logger.debug "HUMANID_OMNIAUTH REQUEST PHASE ___________________________________________________"
 				# In the humanid web-sdk-integration-guide, this would be the "[1] login" step. We need to get the redirect url
 				# through a post request, and then send that to the user.
 
@@ -59,22 +61,16 @@ module OmniAuth
 				#	https://ruby-doc.org/stdlib-2.4.1/libdoc/net/http/rdoc/Net/HTTP.html
 
 				#get uri
-				uri = URI(get_external_signup_url)
+				uri = get_external_signup_uri
 				Rails.logger.debug "HUMANID_OMNIAUTH URI: #{uri.to_s}"
 				#make a post request (but dont send it yet)
 				post_request = Net::HTTP::Post.new(uri)
-				Rails.logger.info "HUMANID_OMNIAUTH post_request: #{post_request}"
-				Rails.logger.info get_client_id
-				Rails.logger.info get_client_secret
 				#set the headers as per docs.
 				post_request['client-id'] = get_client_id
 				post_request['client-secret'] = get_client_secret
 				post_request['Content-Type'] = 'application/json'
 				#send the request using a weirdly 🤷‍♂️ overcomplicated 🤷‍♂️ method 🤷‍♂️ and 🤷‍♂️ block 🤷‍♂️ blame Net::HTTP
-				Rails.logger.info("BEFORE POST")
 				res = Net::HTTP.start(uri.hostname, uri.port, use_ssl: true){|http| http.request(post_request)}
-				Rails.logger.info("AFT POST")
-
 				Rails.logger.info(res)
 				if res.code == "200"
 					body = JSON.parse(res.body)
@@ -89,8 +85,8 @@ module OmniAuth
 					#get the redirect url
 					Rails.logger.info(body)
 					redirect_url = body.dig("data", "webLoginUrl")
-					#check it, throw an error if nil
-					request_phase_err(res) if redirect_url.nil?
+					#check it, throw an error if nil or an int or something random.
+					request_phase_err(res) unless redirect_url.kind_of? String
 					#redirect (everything is working!)
 					Rails.logger.info(redirect_url)
 					redirect redirect_url
