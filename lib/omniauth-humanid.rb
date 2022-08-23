@@ -132,19 +132,14 @@ module OmniAuth
 					raise StandardError.new(str)
 				end
 			end
-
-			def info
+			
+			#not a method? Some DSL magic that is not explained in docs. Just looked at other projects and they did something like this so
+			info do
 				raw_info['data']
 			end
-			def uid
-				info['userAppId']
+			uid do
+				raw_info['data']['userAppId']
 			end
-			def countryCide
-				info['countryCide']
-			end
-			alias userAppId uid
-			alias country_cide countryCide
-			alias country_code countryCide
 		end
 	end
 end
