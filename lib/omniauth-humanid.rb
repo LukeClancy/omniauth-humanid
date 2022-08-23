@@ -5,11 +5,8 @@ module OmniAuth
 		class Humanid
 			include OmniAuth::Strategy
 			#Omniauth strategy creation guide be useful
-			#https://github.com/omniauth/omniauth/wiki/Strategy-Contribution-Guide
-
-			#then this guy created another useful blog 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
-			#🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
-			#https://dev.to/vvo/devise-create-a-local-omniauth-strategy-for-slack-4066
+				#- https://github.com/omniauth/omniauth/wiki/Strategy-Contribution-Guide
+				#- note the request_phase and the callback_phase
 
 			#note the image in the below documentation, I will try to reference back to it below
 			#https://docs.human-id.org/web-sdk-integration-guide#api-request-web-log-in-session
@@ -22,6 +19,7 @@ module OmniAuth
             option :priority_country, nil #this is an option in the docs, but they dont give an example value (otherwise I would set to united_states, or us, or 1)
 			option :client_secret, nil
 			option :client_id, nil
+			option :exchange_url, "https://core.human-id.org/[HUMANID_VERSION]/server/users/exchange"
 
 			# def self.humanid_button
 			# 	#see https://docs.human-id.org/web-sdk-integration-guide
@@ -93,6 +91,57 @@ module OmniAuth
 				else
 					request_phase_err(res)
 				end
+			end
+			#callback phase area
+
+			def get_exchange_uri
+				uri = URI(options.exchange_url.gsub('[HUMANID_VERSION]', options.humanid_version))
+				return uri
+			end
+
+			def callback_phase
+				#when the callback returns from humanID we still need to:
+				#	1. verify it is humanID who sent this request
+				#	2. get the uid and country code
+				#this is done in the verify exchange token step in the humanID docs.
+
+				#get the exchange_token from the humanID callback
+				Rails.logger.info("CALLBACK PHASE")
+				exchange_token = request.params['et']
+				
+				#create the request (as per the humanID docs)
+				uri = get_exchange_uri
+				post_request = Net::HTTP::Post.new(uri)
+				post_request['client-id'] = get_client_id
+				post_request['client-secret'] = get_client_secret
+				post_request['Content-Type'] = 'application/json'
+				post_request.body = {"exchangeToken" => exchange_token}.to_json
+				#send the request, get the response.
+				res = Net::HTTP.start(uri.hostname, uri.port, use_ssl: true){|http| http.request(post_request)}
+				if res.code == "200"
+					request.env['omniauth.auth'] = JSON.parse(res.body)
+				else
+					raise StandardError.new("Issue with the callback_phase of humanid omniauth, response from human id has code: #{res.code}, and body: #{res.body}")
+				end
+			end
+			
+			def uid
+				request.env['omniauth.auth']['data']['userAppId']
+			end
+			alias userAppId uid
+
+			def countryCide
+				request.env['omniauth.auth']['data']['countryCide']
+			end
+			alias country_cide countryCide
+			alias country_code countryCide
+
+			def info
+				request.env['omniauth.auth']['data']
+			end
+
+			def extra
+				request.env['omniauth.auth']
 			end
 		end
 	end
