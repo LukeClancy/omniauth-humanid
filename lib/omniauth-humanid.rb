@@ -21,6 +21,8 @@ module OmniAuth
 			option :client_id, nil
 			option :exchange_url, "https://core.human-id.org/[HUMANID_VERSION]/server/users/exchange"
 
+			attr_accessor :raw_info
+
 			# def self.humanid_button
 			# 	#see https://docs.human-id.org/web-sdk-integration-guide
 			# 	%Q{<a href="#{options.local_sign_up_url}">
@@ -121,33 +123,28 @@ module OmniAuth
 				res = Net::HTTP.start(uri.hostname, uri.port, use_ssl: true){|http| http.request(post_request)}
 				Rails.logger.info("RESPONSE: #{res}")
 				if res.code == "200"
-					request.env['omniauth.auth'] = JSON.parse(res.body)
-					Rails.logger.info(request.env['omniauth.auth'])
+					self.raw_info = JSON.parse(res.body)
+					Rails.logger.info("raw: #{raw_info}")
+					super
 				else
 					str = "Issue with the callback_phase of humanid omniauth, response from human id has code: #{res.code}, and body: #{res.body}"
 					Rails.logger.error str
 					raise StandardError.new(str)
 				end
 			end
-			
-			def uid
-				request.env['omniauth.auth']['data']['userAppId']
-			end
-			alias userAppId uid
-
-			def countryCide
-				request.env['omniauth.auth']['data']['countryCide']
-			end
-			alias country_cide countryCide
-			alias country_code countryCide
 
 			def info
-				request.env['omniauth.auth']['data']
+				raw_info['data']
 			end
-
-			def extra
-				request.env['omniauth.auth']
+			def uid
+				info['userAppId']
 			end
+			def countryCide
+				info['countryCide']
+			end
+			alias userAppId uid
+			alias country_cide countryCide
+			alias country_code countryCide
 		end
 	end
 end
