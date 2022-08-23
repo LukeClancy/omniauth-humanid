@@ -108,6 +108,7 @@ module OmniAuth
 				#get the exchange_token from the humanID callback
 				Rails.logger.info("CALLBACK PHASE")
 				exchange_token = request.params['et']
+				Rails.logger.info("EXCHANGE TOKEN: #{exchange_token}")
 				
 				#create the request (as per the humanID docs)
 				uri = get_exchange_uri
@@ -118,10 +119,14 @@ module OmniAuth
 				post_request.body = {"exchangeToken" => exchange_token}.to_json
 				#send the request, get the response.
 				res = Net::HTTP.start(uri.hostname, uri.port, use_ssl: true){|http| http.request(post_request)}
+				Rails.logger.info("RESPONSE: #{res}")
 				if res.code == "200"
 					request.env['omniauth.auth'] = JSON.parse(res.body)
+					Rails.logger.info(request.env['omniauth.auth'])
 				else
-					raise StandardError.new("Issue with the callback_phase of humanid omniauth, response from human id has code: #{res.code}, and body: #{res.body}")
+					str = "Issue with the callback_phase of humanid omniauth, response from human id has code: #{res.code}, and body: #{res.body}"
+					Rails.logger.error str
+					raise StandardError.new(str)
 				end
 			end
 			
