@@ -1,4 +1,4 @@
-version = '0.0.16'
+version = '0.0.17'
 #version must be on the first line for the update script
 
 Gem::Specification.new do |spec|
