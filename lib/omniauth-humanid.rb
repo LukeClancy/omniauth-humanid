@@ -4,7 +4,7 @@ module OmniAuth
 	module Strategies
 		class Humanid
 			include OmniAuth::Strategy
-			#Omniauth strategy creation guide be useful
+			#Omniauth strategy creation guide can be useful
 				#- https://github.com/omniauth/omniauth/wiki/Strategy-Contribution-Guide
 				#- note the request_phase and the callback_phase
 
@@ -62,7 +62,7 @@ module OmniAuth
 
 				#get uri
 				uri = get_external_signup_uri
-				Rails.logger.debug "HUMANID_OMNIAUTH URI: #{uri.to_s}"
+				Rails.logger.debug "uri: #{uri.to_s}"
 				#make a post request (but dont send it yet)
 				post_request = Net::HTTP::Post.new(uri)
 				#set the headers as per docs.
@@ -108,9 +108,8 @@ module OmniAuth
 				#this is done in the verify exchange token step in the humanID docs.
 
 				#get the exchange_token from the humanID callback
-				Rails.logger.info("CALLBACK PHASE")
+				Rails.logger.info("humanid callback phase")
 				exchange_token = request.params['et']
-				Rails.logger.info("EXCHANGE TOKEN: #{exchange_token}")
 				
 				#create the request (as per the humanID docs)
 				uri = get_exchange_uri
@@ -121,10 +120,9 @@ module OmniAuth
 				post_request.body = {"exchangeToken" => exchange_token}.to_json
 				#send the request, get the response.
 				res = Net::HTTP.start(uri.hostname, uri.port, use_ssl: true){|http| http.request(post_request)}
-				Rails.logger.info("RESPONSE: #{res}")
 				if res.code == "200"
 					self.raw_info = JSON.parse(res.body)
-					Rails.logger.info("raw: #{raw_info}")
+					Rails.logger.info("humanid callback phase: success")
 					super
 				else
 					str = "Issue with the callback_phase of humanid omniauth, response from human id has code: #{res.code}, and body: #{res.body}"
@@ -133,12 +131,10 @@ module OmniAuth
 				end
 			end
 			
-			#not a method? Some DSL magic that is not explained in docs. Just looked at other projects and they did something like this so
+			#not a method? Some DSL magic that is not explained in docs.
+			#tried to do the same with uid but it didn't work. Either way its accessible now
 			info do
 				raw_info['data']
-			end
-			uid do
-				raw_info['data']['userAppId']
 			end
 		end
 	end
