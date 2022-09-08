@@ -1,11 +1,13 @@
 # Ruby/Rails OmniAuth for HumanID Alpha
 
+status: working, but will wait a while to make sure before bumping to 1.0.0
+
 Omniauth for humanID, a platform that prevents bots and increases privacy. HumanID is run by Human Internet,
 a non-profit that is currently financed by organizations such as Harvard and the Mozilla Foundation (I love the Mozilla
 Developer Network (MDN) which gives great javascript information).
 
 HumanID works best when used as the only sign-up solution, due to this HumanID has to be highly trusted. This is where their
-non-profit status steps in. HumanID has many benifits:
+non-profit status steps in. HumanID has many benefits:
 
 1. Increased privacy for users through both technical innovations and legal responsibilities.
 2. Making bots inconvienient by requiring phone verification.
@@ -15,6 +17,8 @@ non-profit status steps in. HumanID has many benifits:
 6. Much better look than "sign up with [tech monopoly here]" buttons.
 
 ## Installation
+
+This gem relies on the [omniauth gem](https://github.com/omniauth/omniauth). It was also developed along-side [devise](https://github.com/heartcombo/devise), but should work without it, some of the configuration may change though.
 
 Add this line to your application's Gemfile:
 
@@ -54,9 +58,39 @@ Update as normal.
 	= form_with url: user_humanid_omniauth_authorize_path, method: :post do
 		%input{type: :image, src: image_pack_path("icons/sign_in_logos/humanID.svg"), alt: "Anonymous Login with humanID"}
     ```
-5. Create your callback area (still in development)
-    - This area is generally supposed to be customizable, as you might have a diffrent model name, want to attach some validations, etc, etc. So it is not included in the gem, but is here as a how-to.
-    - TBD
+5. Create your callback area
+    - This area is generally supposed to be customizable, as you might have a different model name, want to attach some validations, etc, etc. So it is not included in the gem, but is here a partial implementation of it.
+	```ruby
+	#in the omnath_callbacks_controller.rb file
+	def accept_country_code?(code)
+		true
+	end
+	def humanid
+		omau = request.env['omniauth.auth']
+		uid = omau.info.appUserId
+		country_code = omau.info.countryCode
+		provider = omau.provider
+		Rails.logger.info("#{provider} - #{country_code} - #{uid}")
+	
+		unless accept_country_code?(country_code)
+			redirect_to root_path, flash: {info: "phone number's country-code not accepted at this time"}
+			return
+		end
+	
+		user = User.find_by(provider: provider, uid: uid)
+		if user
+			#allready have an account, sign them in
+			sign_in_and_redirect user, event: :authentication
+		else
+			request.session['signup'] ||= {}
+			request.session["signup"]["provider"] = provider
+			request.session["signup"]["uid"] = uid
+			request.session["signup"]["country_code"] = country_code
+			#continue the signup process, perhaps with a redirect, or create the user here,
+			#and redirect to the main website. 
+		end
+	end
+	```
 
 ## Additional configuration
 
@@ -67,6 +101,7 @@ additional configuration can be set in your initializer file at the same area an
 - humanid_version: version string that goes in the url. Defaults to 'v0.0.3'. If humanid updates this may need to be updated aswell.
 - priority_country: not sure exactly what this does or how to use it, but it was in the docs so i added it as an option. Defaults to nil.
 - external_signup_url: the web login url. Defaults to: "https://core.human-id.org/[HUMANID_VERSION]/server/users/web-login". [HUMANID_VERSION] gets substituted by humanid_version above.
+- exchange_url: the exchange url. Defaults to: "https://core.human-id.org/[HUMANID_VERSION]/server/users/exchange". [HUMANID_VERSION] gets substituted by humanid_version above.
 
 ### Devise without emails/passwords
 
@@ -82,11 +117,11 @@ Although Devise is easier to deal with without usernames / passwords, it takes a
 2. In your devise.rb initializer file, make sure to set authentication_keys to []
 3. delete or comment out the selections in devise.rb related to number 1.
 4. I had to add back the route below:
-```ruby
-as :user do
-	delete "/users/sign_out" => "users/sessions#destroy"
-end
-```
+	```ruby
+	as :user do
+		delete "/users/sign_out" => "users/sessions#destroy"
+	end
+	```
 5. For development you may have to create a seperate way to login/signup for testing purposes. You can do this by sending a form that implements the method 'sign_in_and_redirect user, event: :authentication', or that sets fake values for signup. MAKE SURE THIS METHOD IS ONLY ACTIVE DURING DEVELOPMENT. I have a version of this below:
 	- in my routes.rb:
 	```ruby
@@ -98,24 +133,22 @@ end
 	```
 	- in my OmniauthCallbacksController override (see devise documentation):
 	```ruby
-	def callback_common(provider, uid)
-		user = User.from_omniauth(provider, uid)
-		if user
-			#allready have an account, sign them in
-			sign_in_and_redirect user, event: :authentication # this will throw if user is not activated
-		else
-			request.session['signup'] ||= {}
-			request.session["signup"]["provider"] = provider
-			request.session["signup"]["uid"] = uid
-			raise StandardError.new("REPLACE THIS ERROR WITH A REDIRECT TO FINISH SIGNUP")
-		end
-	end
 	if Rails.env.development?
 		def callback_override
 			raise StandardError.new("nope") unless Rails.env.development?
 			provider = 'override'
 			uid = params['uid']
-			callback_common provider, uid
+			user = User.find_by(provider: provider, uid: uid)
+			if user
+				#allready have an account, sign them in
+				sign_in_and_redirect user, event: :authentication # this will throw if user is not activated
+			else
+				request.session['signup'] ||= {}
+				request.session["signup"]["provider"] = provider
+				request.session["signup"]["uid"] = uid
+				request.session["signup"]["country_code"] = 'US'
+				#continue your usual sign-up process. Note for the override strategy that the username is the uid.
+			end
 		end
 	end
 	```
