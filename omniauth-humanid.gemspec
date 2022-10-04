@@ -1,4 +1,4 @@
-require_relative 'lib/omniauth_humanid/version'
+require_relative 'lib/omniauth-humanid/version'
 
 Gem::Specification.new do |spec|
   spec.name          = "omniauth-humanid"
