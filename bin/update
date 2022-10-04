@@ -5,26 +5,33 @@
 #   you can one-line that with './bin/bundle update && ../bin rails s' though. Just
 #   make sure you use ~> in the gemfile and your first 2 version numbers are correct.
 
-x = File.read('./omniauth-humanid.gemspec')
-x = x.split("\n")
-puts x.class
-puts x.length
-puts x
+#x = File.read('./omniauth-humanid.gemspec')
+#x = x.split("\n")
+#puts x.class
+#puts x.length
+#puts x
 puts "_______________________________________________"
-version = eval(x[0])
-puts "version: #{version}"
-puts "_______________________________________________"
-version = version.split('.')
+require_relative '../lib/omniauth-humanid/version.rb'
+old_version = OmniauthHumanid::VERSION
+version = old_version.split('.')
 version[-1] = ((version[-1].to_i) + 1).to_s
 version_new = version.join('.')
-puts "version_new: #{version_new}"
-puts "_______________________________________________"
-x[0] = "version = '#{version_new}'"
-puts "x[0] => #{x[0]}"
-puts "_______________________________________________"
-x = x.join("\n")
-puts x
-File.write('./omniauth-humanid.gemspec', x)
+
+puts File.dirname(__FILE__)
+puts "old version: #{old_version}"
+
+write_to = "#{File.dirname(__FILE__)}/../lib/omniauth-humanid/version.rb"
+
+puts "updating #{write_to} to new version #{version_new}"
+
+
+File.write(write_to, %Q{
+module OmniauthHumanid
+    VERSION = "#{version_new}"
+end
+#this file gets overwritten automatically on minor updates, major ones need to be manually changed
+})
+
 puts "_______________________________________________"
 puts "BUNDLE UPDATE"
 puts `bundle update`
