@@ -1,9 +1,8 @@
-version = '1.0.1'
-#version must be on the first line for the update script
+require_relative 'lib/omniauth_humanid/version'
 
 Gem::Specification.new do |spec|
   spec.name          = "omniauth-humanid"
-  spec.version       = version
+  spec.version       = OmniauthHumanid::VERSION
   spec.authors       = ["Luke Clancy"]
   spec.email         = ["lukeclancy@hotmail.com"]
 
