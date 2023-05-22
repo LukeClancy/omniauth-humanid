@@ -1,6 +1,6 @@
 # Ruby/Rails OmniAuth for HumanID
 
-# status: No longer maintained Working last i checked
+## status: No longer maintained Working last i checked
 
 Omniauth for humanID, a platform that prevents bots and increases privacy. HumanID is run by Human Internet,
 a non-profit that is currently financed by organizations such as Harvard and the Mozilla Foundation (I love the Mozilla
